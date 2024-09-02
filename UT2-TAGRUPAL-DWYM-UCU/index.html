@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>UT2 - Bulma</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="container">
+            <div id="header">
+                <p class="title is-4 has-text-start hast-text-weight-semibold">Gestor de tareas</p>
+                <button id="newTask" class="button is-primary">Agregar tarea</button>
+            </div>
+            <div class="buttons level-right">
+                <button id="darkModeToggle" class="button is-light"> 🌙 </button>
+                <button id="newTaskMini" class="button is-primary">+</button>
+            </div>
+            <div class="columns taskSuper">
+                <div class="column taskColumn" id="backlog" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                    <p class="title is-5 has-text-start">Backlog</p>
+                        <div class="taskBody">
+                        </div>
+                </div>
+                <div class="column taskColumn" id="toDo" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                    <p class="title is-5">To Do</p>
+                        <div class="taskBody">
+                        </div>
+                </div>
+                <div class="column taskColumn" id="inProgress" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                    <p class="title is-5 has-text-start">In Progress</p>
+                        <div class="taskBody"></div>
+                </div>
+                <div class="column taskColumn" id="blocked" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                    <p class="title is-5 has-text-start">Blocked</p>
+                        <div class="taskBody"></div>    
+                </div>
+                <div class="column taskColumn" id="done" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                    <p class="title is-5 has-text-start">Done</p>
+                        <div class="taskBody"></div>
+                </div>
+            </div>
+            <div id="modal-container"></div>
+            <div id="modal-container-edit"></div>
+        </div>
+        <script src="js/createTask.js"></script>
+        <script src="js/task.js"></script>
+        <script src="js/init.js"></script>
+        <script src="js/darkMode.js"></script>
+        <script src="js/dragAndDrop.js"></script>
+    </body>
+</html>

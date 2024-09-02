@@ -1,0 +1,42 @@
+@use "sass/utilities/initial-variables" as iv;
+@use "sass/utilities/css-variables" as cv;
+@use "sass/utilities/derived-variables" as dv;
+@use "sass/themes/setup";
+
+$scheme-main-l: 11%;
+$background-l: 14%;
+$text-l: 71%;
+
+$scheme-main: hsl(iv.$scheme-h, iv.$scheme-s, $scheme-main-l);
+$background: hsl(iv.$scheme-h, iv.$scheme-s, $background-l);
+$text: hsl(iv.$scheme-h, iv.$scheme-s, $text-l);
+
+@mixin dark-theme {
+  @include cv.register-vars(
+    (
+      "scheme-brightness": "dark",
+      "scheme-main-l": $scheme-main-l,
+      "scheme-main-bis-l": $scheme-main-l + 2%,
+      "scheme-main-ter-l": $scheme-main-l + 4%,
+      "background-l": $background-l,
+      "border-weak-l": 21%,
+      "border-l": 24%,
+      "text-weak-l": 53%,
+      "text-l": $text-l,
+      "text-strong-l": 93%,
+      "text-title-l": 100%,
+      "hover-background-l-delta": 5%,
+      "active-background-l-delta": 10%,
+      "hover-border-l-delta": 10%,
+      "active-border-l-delta": 20%,
+      "hover-color-l-delta": 5%,
+      "active-color-l-delta": 10%,
+    )
+  );
+  
+   @each $name, $color in dv.$colors {
+    @include cv.generate-on-scheme-colors($name, $color, $scheme-main);
+  }
+
+  @include cv.register-hsl("shadow", white);
+}
