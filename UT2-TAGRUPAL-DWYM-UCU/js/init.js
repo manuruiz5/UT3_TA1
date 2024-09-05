@@ -67,3 +67,23 @@ function initilizeTasks() {
     );
 }
 
+document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('delete-task-button')) {
+        const taskId = event.target.getAttribute('data-id');
+        deleteTask(taskId);
+    }
+});
+function deleteTask(taskId) {
+    const taskElement = document.getElementById(taskId);
+    if (taskElement) {
+        taskElement.remove();
+    }
+     // Obtener las tareas actuales del almacenamiento local
+     let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
+
+     // Filtrar la tarea que se va a eliminar
+     tasks = tasks.filter(task => task.id !== taskId);
+ 
+     // Guardar las tareas actualizadas en el almacenamiento local
+     localStorage.setItem('tasks', JSON.stringify(tasks));
+   }

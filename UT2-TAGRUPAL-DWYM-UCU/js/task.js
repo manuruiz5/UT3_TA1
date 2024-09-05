@@ -29,6 +29,9 @@ class Task {
                         <div class="ml-0">
                             <p class="title is-5 has-text-weight-semibold">${this.title}</p>
                         </div>
+                        <button class="delete-task-button button is-danger is-light is-small delete-task-top-right" onclick="event.stopPropagation(); deleteTask('${this.id}');">
+                            Eliminar
+                        </button>
                         </div>
                         <div>
                         <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
