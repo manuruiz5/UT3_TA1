@@ -1,9 +1,84 @@
 let taskModal;
 let tasks = [];
 
+async function fetchTasks() {
+    try {
+        const response = await fetch('http://localhost:3000/api/tasks');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        tasks = await response.json();
+        console.log(tasks);
+        renderTasks(tasks);
+    } catch (error) {
+        console.error("Failed to fetch tasks:", error);
+    }
+}
+function renderTasks(tasks) {
+    // Recorremos las columnas y vaciamos su contenido para agregar las tareas obtenidas
+    const columns = {
+        backlog: document.getElementById('backlog').querySelector('.taskBody'),
+        toDo: document.getElementById('toDo').querySelector('.taskBody'),
+        inProgress: document.getElementById('inProgress').querySelector('.taskBody'),
+        blocked: document.getElementById('blocked').querySelector('.taskBody'),
+        done: document.getElementById('done').querySelector('.taskBody'),
+    };
+
+    Object.values(columns).forEach(column => column.innerHTML = ''); // Vaciar columnas
+
+    // Mapeo de estados a las columnas correctas
+    const statusToColumnKey = {
+        "To Do": "toDo",
+        "In Progress": "inProgress",
+        "Backlog": "backlog",
+        "Blocked": "blocked",
+        "Done": "done"
+    };
+
+    // Agregar las tareas a sus respectivas columnas
+    tasks.forEach(task => {
+        const columnKey = statusToColumnKey[task.status];
+        if (columns[columnKey]) {
+            const taskElement = createTaskElement(task);  // Definir el taskElement
+            columns[columnKey].appendChild(taskElement);
+        } else {
+            console.error(`Columna no encontrada para el estado: ${task.status}`);
+        }
+    });
+}
+
+function createTaskElement(task) {
+    const taskObj = new Task(
+        task.title, 
+        task.description, 
+        task.assignedTo, 
+        task.priority, 
+        task.status, 
+        task.startDate, 
+        task.endDate, 
+        task.id,
+    );
+    const taskHTML = taskObj.toHTML();
+    const template = document.createElement('template');
+    template.innerHTML = taskHTML.trim();  // Convertir la cadena en elementos DOM
+    return template.content.firstChild;
+}
+async function addTask(task) {
+    const response = await fetch('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(task),
+    });
+    const newTask = await response.json();
+    return newTask;
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    initilizeTasks();
+    fetchTasks();
 
     const personas = ["Persona 1", "Persona 2", "Persona 3", "Persona 4", "Persona 5"];
     const prioridades = ["Alta", "Media", "Baja"];
@@ -33,39 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-function initilizeTasks() {
-    let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
-
-    let backLog = document.getElementById('backlog');
-    let toDo = document.getElementById('toDo');
-    let inProgress = document.getElementById('inProgress');
-    let blocked = document.getElementById('blocked');
-    let done = document.getElementById('done');
-
-    tasks.forEach(task => {
-        const taskObj = new Task(task.title, task.description, task.assignedTo, task.priority, task.status, task.createdAt, task.dueDate, task.id);
-        switch (taskObj.status) {
-            case 'backlog':
-                backLog.innerHTML += taskObj.toHTML();
-                break;
-            case 'toDo':
-                toDo.innerHTML += taskObj.toHTML();
-                break;
-            case 'inProgress':
-                inProgress.innerHTML += taskObj.toHTML();
-                break;
-            case 'blocked':
-                blocked.innerHTML += taskObj.toHTML();
-                break;
-            case 'done':
-                done.innerHTML += taskObj.toHTML();
-                break;
-            default:
-                break;
-        }
-    }
-    );
-}
 
 document.addEventListener('click', (event) => {
     if (event.target.classList.contains('delete-task-button')) {
@@ -73,17 +115,20 @@ document.addEventListener('click', (event) => {
         deleteTask(taskId);
     }
 });
-function deleteTask(taskId) {
-    const taskElement = document.getElementById(taskId);
-    if (taskElement) {
-        taskElement.remove();
-    }
-     // Obtener las tareas actuales del almacenamiento local
-     let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
 
-     // Filtrar la tarea que se va a eliminar
-     tasks = tasks.filter(task => task.id !== taskId);
- 
-     // Guardar las tareas actualizadas en el almacenamiento local
-     localStorage.setItem('tasks', JSON.stringify(tasks));
-   }
+async function deleteTask(taskId) {
+    await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+        method: 'DELETE',
+    });
+}
+
+async function updateTask(taskId, updatedTask) {
+    const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTask),
+    });
+    return await response.json();
+}
