@@ -73,7 +73,7 @@ class CreateTask {
                             <div class="field">
                                 <label class="label">Fecha límite</label>
                                 <div class="control">
-                                    <input class="input" type="date" id="taskDueDate">
+                                    <input class="input" type="date" id="taskEndDate">
                                 </div>
                             </div>
                         </form>
@@ -130,39 +130,30 @@ class CreateTask {
         document.querySelector('#taskAssigned').value = currentTask.assignedTo;
         document.querySelector('#taskPriority').value = currentTask.priority;
         document.querySelector('#taskStatus').value = currentTask.status;
-        document.querySelector('#taskDueDate').value = currentTask.dueDate;
+        document.querySelector('#taskEndDate').value = currentTask.endDate;
         document.querySelector('.modal-card-title').textContent = 'Editar tarea';
         document.querySelector('#saveButton button').textContent = 'Guardar cambios';
         document.querySelector('#saveButton button').disabled = false;
         document.querySelector('#modal-container .modal').classList.add('is-active');
     }
 
-    saveTask() {
+    async saveTask() {
         if (!this.validateTask()) return;
 
-        // Elimina la tarea actual si se está editando para que no se duplique.
-        if(this.editing) {
-            document.getElementById(this.task.id).remove();
-            let tasks = JSON.parse(localStorage.getItem('tasks'));
-            tasks = tasks.filter(t => t.id !== this.task.id);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            this.editing = false;
-            this.task = null;
-        }
 
         const title = document.querySelector('#taskTitle').value;
         const description = document.querySelector('#taskDesc').value;
         const assigned = document.querySelector('#taskAssigned').value;
         const priority = document.querySelector('#taskPriority').value;
         const status = document.querySelector('#taskStatus').value;
-        let dueDate = document.querySelector('#taskDueDate').value;
+        let endDate = document.querySelector('#taskEndDate').value;
         const uniqueId = `task-${Math.random().toString(36).substr(2, 9)}`
-        if (!dueDate) {
+        if (!endDate) {
             const today = new Date();
             today.setDate(today.getDate() + 7);
-            dueDate = today.toISOString().slice(0, 10);
+            endDate = today.toISOString().slice(0, 10);
         }
-        const task = new Task(title, description, assigned, priority, status, new Date().toISOString().slice(0, 10), dueDate, uniqueId);
+        const task = new Task(title, description, assigned, priority, status, new Date().toISOString().slice(0, 10), endDate, uniqueId);
         let backLog = document.getElementById('backlog');
         let toDo = document.getElementById('toDo');
         let inProgress = document.getElementById('inProgress');
@@ -191,6 +182,8 @@ class CreateTask {
         tasks.push(task);
         localStorage.setItem('tasks', JSON.stringify(tasks));
 
+        addTask(task);
+
         // Limpia los campos después de guardar la tarea
         this.cancelTask();
     }
@@ -200,7 +193,7 @@ class CreateTask {
         document.querySelector('#taskAssigned').selectedIndex = 0;
         document.querySelector('#taskPriority').selectedIndex = 0;
         document.querySelector('#taskStatus').selectedIndex = 0;
-        document.querySelector('#taskDueDate').value = '';
+        document.querySelector('#taskEndDate').value = '';
         document.getElementById('titleError').style.display = 'none';
         document.getElementById('descriptionError').style.display = 'none';
         document.querySelector('#taskTitle').classList.remove('is-danger');

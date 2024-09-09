@@ -6,64 +6,66 @@
  * @param {string} priority - Prioridad de la tarea.
  * @param {string} status - Estado de la tarea.
  * @param {string} createdAt - Fecha de creación de la tarea.
- * @param {string} dueDate - Fecha límite de la tarea.
+ * @param {string} endDate - Fecha límite de la tarea.
  * @param {string} id - Id unica de la tarea
- */
-class Task {
-    constructor(title, description, assignedTo, priority, status, createdAt, dueDate, id) {
+ */class Task {
+    constructor(title, description, assignedTo, priority, status, createdAt, endDate, id) {
         this.title = title;
         this.description = description;
         this.assignedTo = assignedTo;
         this.priority = priority;
         this.status = status;
         this.createdAt = createdAt;
-        this.dueDate = dueDate;
+        this.endDate = endDate; // Cambiado de dueDate a endDate
         this.id = id;
     }
     toHTML() {
         return `
             <div id="${this.id}"  class="card task" draggable="true" ondragstart="onDragStart(event)" onclick="taskModal.loadTask(this)">
-                <div class="card-content">
-                    <div class="content">
-                        <div class="mb-5 is-flex is-align-items-center">
-                        <div class="ml-0">
-                            <p class="title is-5 has-text-weight-semibold">${this.title}</p>
-                        </div>
-                        <button class="delete-task-button button is-danger is-light is-small delete-task-top-right" onclick="event.stopPropagation(); deleteTask('${this.id}');">
-                            Eliminar
-                        </button>
-                        </div>
-                        <div>
-                        <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
-                            <h5 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Fecha de inicio</h5>
-                            <span class="tag is-light">${this.createdAt}</span>
-                        </div>
-                        <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
-                            <h4 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Prioridad</h4>
-                            <span class="tag ${this.calculateColorbyPriority(this.priority)} is-light">${this.priority.toUpperCase()}</span>
-                        </div>
-                        <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
-                            <h4 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Fecha de fin</h4>
-                            <span class="tag ${this.calculateColorbyDueDate(this.createdAt, this.dueDate)} is-light">${this.dueDate}</span>
-                        </div>
-                        <div class="content mb-5 is-flex is-justify-content-space-between is-align-items-center">
-                            <h4 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Asignado</h4>
-                            <span class="tag is-light">${this.assignedTo}</span>
-                        </div>
-                        <div class="mb-3 pt-1 is-relative has-background-primary-light">
-                            <div class="has-background-warning" style="position: absolute; top: 0; left: 0; width: ${this.calculateProgress(this.createdAt, this.dueDate)}%; height: 100%"></div>
-                        </div>
-                        <div class="is-flex is-align-items-center">
-                            <span class="tag is-link is-light mr-2" style="font-size: 12px;" data-config-id="label2">${this.status}</span>
-                            <span class="has-text-weight-semibold has-text-grey-light" style="font-size: 12px;">${this.textState(this.status)}</span>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+               <div class="card-content">
+                   <div class="content">
+                       <div class="mb-5 is-flex is-align-items-center">
+                       <div class="ml-0">
+                           <p class="title is-5 has-text-weight-semibold">${this.title}</p>
+                       </div>
+                       <button class="delete-task-button button is-danger is-light is-small delete-task-top-right" onclick="event.stopPropagation(); deleteTask('${this.id}');">
+                           Eliminar
+                       </button>
+                       </div>
+                       <div>
+                       <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
+                           <h5 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Fecha de inicio</h5>
+                           <span class="tag is-light">${this.createdAt}</span>
+                       </div>
+                       <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
+                           <h4 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Prioridad</h4>
+                           <span class="tag ${this.calculateColorbyPriority(this.priority)} is-light">${this.priority.toUpperCase()}</span>
+                       </div>
+                       <div class="content mb-2 is-flex is-justify-content-space-between is-align-items-center">
+                           <h4 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Fecha de fin</h4>
+                           <span class="tag ${this.calculateColorbyDueDate(this.createdAt, this.endDate)} is-light">${this.endDate}</span>
+                       </div>
+                       <div class="content mb-5 is-flex is-justify-content-space-between is-align-items-center">
+                           <h4 class="mb-0 has-text-weight-normal" style="font-size: 13px;">Asignado</h4>
+                           <span class="tag is-light">${this.assignedTo}</span>
+                       </div>
+                       <div class="mb-3 pt-1 is-relative has-background-primary-light">
+                           <div class="has-background-warning" style="position: absolute; top: 0; left: 0; width: ${this.calculateProgress(this.createdAt, this.endDate)}%; height: 100%"></div>
+                       </div>
+                       <div class="is-flex is-align-items-center">
+                           <span class="tag is-link is-light mr-2" style="font-size: 12px;" data-config-id="label2">${this.status}</span>
+                           <span class="has-text-weight-semibold has-text-grey-light" style="font-size: 12px;">${this.textState(this.status)}</span>
+                       </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       `;
     }
 
+  
+
+  
     /**
      * Calculo el color de la etiqueta de prioridad.
      * @param {*} priority - Prioridad de la tarea.
