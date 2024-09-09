@@ -23,7 +23,6 @@ async function fetchTasks() {
 }
 
 function renderTasks(tasks) {
-    // Recorremos las columnas y vaciamos su contenido para agregar las tareas obtenidas
     const columns = {
         backlog: document.getElementById('backlog')?.querySelector('.taskBody'),
         toDo: document.getElementById('toDo')?.querySelector('.taskBody'),
@@ -32,29 +31,33 @@ function renderTasks(tasks) {
         done: document.getElementById('done')?.querySelector('.taskBody'),
     };
 
-    Object.values(columns).forEach(column => column.innerHTML = ''); // Vaciar columnas
+    Object.values(columns).forEach(column => column.innerHTML = '');
 
-    // Mapeo de estados a las columnas correctas
     const statusToColumnKey = {
-        "To do": "toDo",
-        "In progress": "inProgress",
+        "To Do": "toDo",
+        "In Progress": "inProgress",
         "Backlog": "backlog",
         "Blocked": "blocked",
-        "Done": "done"
+        "Done": "done",
+        "toDo": "toDo",
+        "inProgress": "inProgress",
+        "blocked": "blocked",
+        "done": "done",
+        "backlog": "backlog"
     };
 
-    // Agregamos las tareas a sus respectivas columnas
     tasks.forEach(task => {
-        const normalizedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
-        const columnKey = statusToColumnKey[normalizedStatus];
-       if (columns[columnKey]) {
+        const normalizedStatus = statusToColumnKey[task.status];
+        
+        if (columns[normalizedStatus]) {
             const taskElement = createTaskElement(task);
-            columns[columnKey].appendChild(taskElement);
+            columns[normalizedStatus].appendChild(taskElement);
         } else {
-            console.error("Columna no encontrada para el estado:{task.status}");
+            console.error(`Columna no encontrada para el estado: ${task.status}`);
         }
     });
 }
+
 
 
 function createTaskElement(task) {
@@ -87,7 +90,7 @@ async function addTask(task) {
         });
 
         if (!response.ok) {
-            throw new Error("HTTP error! status: ${response.status}");
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const newTask = await response.json();
@@ -142,7 +145,7 @@ async function deleteTask(taskId) {
         });
         
         if (!response.ok) {
-            throw new Error("HTTP error! status: ${response.status}");
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         // Eliminar el elemento de la interfaz de usuario también podría ser una buena idea
