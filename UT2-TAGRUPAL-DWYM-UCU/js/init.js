@@ -137,7 +137,7 @@ document.addEventListener('click', (event) => {
 
 async function deleteTask(taskId) {
     try {
-        const response = await fetch("http://localhost:3000/api/tasks/${taskId}", {
+        const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
             method: 'DELETE',
         });
         
@@ -153,23 +153,40 @@ async function deleteTask(taskId) {
 }
 
 async function updateTask(taskId, updatedTask) {
-
-
     try {
-        const response = await fetch("http://localhost:3000/api/tasks/${taskId}", {
+        if (!taskId) {
+            console.error('taskId no está definido');
+            return;
+          }
+        const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(transformedTask),
+            body: JSON.stringify(updatedTask),
         });
 
-        if (!response.ok) {
-            throw new Error("HTTP error! status: ${response.status}");
+        if (response.ok) {
+            const updatedTaskFromBackend = await response.json();
+            // Aquí puedes actualizar la interfaz del frontend con la respuesta obtenida
+            updateTaskInUI(updatedTaskFromBackend); // Esta función debe actualizar el DOM
+          } else {
+            console.error('Error al actualizar la tarea');
+          }
+        } catch (error) {
+          console.error('Error de red al actualizar la tarea:', error);
         }
-        
-        return await response.json();
-    } catch (error) {
-        console.error("Failed to update task:", error);
-    }
 }
+
+function updateTaskInUI(updatedTask) {
+    const taskElement = document.getElementById(`task-${updatedTask.id}`);
+    
+    // Actualiza los valores del DOM según los nuevos datos
+    taskElement.querySelector('.taskTitle').textContent = updatedTask.title;
+    taskElement.querySelector('.taskDescription').textContent = updatedTask.description;
+    taskElement.querySelector('.taskStatus').textContent = updatedTask.status;
+    taskElement.querySelector('.taskPriority').textContent = updatedTask.priority;
+    taskElement.querySelector('.taskAssigned').textContent = updatedTask.assignedTo;
+    taskElement.querySelector('.taskEndDate').textContent = updatedTask.endDate;
+  }
+  
