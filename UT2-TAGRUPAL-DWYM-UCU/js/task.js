@@ -16,7 +16,7 @@
         this.priority = priority;
         this.status = status;
         this.createdAt = createdAt;
-        this.endDate = endDate; // Cambiado de dueDate a endDate
+        this.endDate = endDate; 
         this.id = id;
     }
     toHTML() {
@@ -90,15 +90,15 @@
      */
     textState(status) {
         switch (status) {
-            case 'backlog'|| 'Backlog':
+            case 'backlog':
                 return 'La tarea está en el Backlog';
-            case 'toDo' || 'To Do':
+            case 'toDo' :
                 return 'La tarea está en Proceso';
-            case 'inProgress'|| 'In Progress':
+            case 'inProgress':
                 return 'La tarea está en Progreso';
-            case 'blocked' || 'Blocked':
+            case 'blocked':
                 return 'La tarea está Bloqueada';
-            case 'done'|| 'Done':
+            case 'done':
                 return 'La tarea está Completada';
             default:
                 return 'No se ha definido el estado de la tarea';

@@ -1,6 +1,17 @@
 let taskModal;
 let tasks = [];
-
+const statusToColumnKey = {
+    "To Do": "toDo",
+    "In Progress": "inProgress",
+    "Backlog": "backlog",
+    "Blocked": "blocked",
+    "Done": "done",
+    "toDo": "toDo",
+    "inProgress": "inProgress",
+    "blocked": "blocked",
+    "done": "done",
+    "backlog": "backlog"
+};
 async function fetchTasks() {
     try {
         const response = await fetch('http://localhost:3000/api/tasks');
@@ -10,7 +21,7 @@ async function fetchTasks() {
         const data = await response.json();
         if (data.length === 0) {
             console.log('No tasks found');
-            return; // Salir si no hay tareas
+            return; 
         }
         tasks = data;
         console.log(tasks);
@@ -29,21 +40,10 @@ function renderTasks(tasks) {
         done: document.getElementById('done')?.querySelector('.taskBody'),
     };
     Object.values(columns).forEach(column => column.innerHTML = '');
-    const statusToColumnKey = {
-        "To Do": "toDo",
-        "In Progress": "inProgress",
-        "Backlog": "backlog",
-        "Blocked": "blocked",
-        "Done": "done",
-        "toDo": "toDo",
-        "inProgress": "inProgress",
-        "blocked": "blocked",
-        "done": "done",
-        "backlog": "backlog"
-    };
+    
     tasks.forEach(task => {
         const normalizedStatus = statusToColumnKey[task.status];
-        
+
         if (columns[normalizedStatus]) {
             const taskElement = createTaskElement(task);
             columns[normalizedStatus].appendChild(taskElement);
@@ -55,19 +55,27 @@ function renderTasks(tasks) {
 
 function createTaskElement(task) {
     const taskObj = new Task(
-        task.title, 
-        task.description, 
-        task.assignedTo, 
-        task.priority, 
-        task.status, 
-        task.startDate || task.createdAt, 
-        task.endDate, 
+        task.title,
+        task.description,
+        task.assignedTo,
+        task.priority,
+        task.status,
+        task.startDate || task.createdAt,
+        task.endDate,
         task.id
     );
     const taskHTML = taskObj.toHTML();
     const template = document.createElement('template');
-    template.innerHTML = taskHTML.trim();  // Convertir la cadena en elementos DOM
-    return template.content.firstChild;
+    template.innerHTML = taskHTML.trim();  
+    const taskElement = template.content.firstChild;
+
+    if (taskElement) {
+        taskElement.id = task.id;
+    } else {
+        console.error('Error al crear el elemento de tarea');
+    }
+
+    return taskElement;
 }
 
 async function addTask(task) {
@@ -81,9 +89,13 @@ async function addTask(task) {
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        } 
+        }
         const newTask = await response.json();
-        return newTask;
+        const taskElement = createTaskElement(newTask);
+        const column = document.getElementById(statusToColumnKey[newTask.status]);
+        if (column) {
+            column.querySelector('.taskBody').appendChild(taskElement);
+        }
     } catch (error) {
         console.error("Failed to add task:", error);
     }
@@ -134,8 +146,7 @@ async function deleteTask(taskId) {
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }      
-        // Eliminar el elemento de la interfaz de usuario también podría ser una buena idea
+        }
         document.getElementById(taskId)?.remove();
     } catch (error) {
         console.error("Failed to delete task:", error);
@@ -151,12 +162,13 @@ async function updateTask(taskId, updatedTask) {
             },
             body: JSON.stringify(updatedTask),
         });
-        if (response.ok) {
-            const updatedTaskFromBackend = await response.json();
-            updateTaskInUI(updatedTaskFromBackend); // Actualiza el DOM
-        } else {
-            console.error('Error al actualizar la tarea');
+
+        if (!response.ok) {
+            throw new Error('Error al actualizar la tarea');
         }
+
+        const task = await response.json();
+        updateTaskInUI(task);  
     } catch (error) {
         console.error('Error de red al actualizar la tarea:', error);
     }
@@ -164,15 +176,27 @@ async function updateTask(taskId, updatedTask) {
 
 
 
-function updateTaskInUI(updatedTask) {
-    const taskElement = document.getElementById(`task-${updatedTask.id}`);
-    // Actualiza los valores del DOM según los nuevos datos
-    taskElement.querySelector('.taskTitle').textContent = updatedTask.title;
-    taskElement.querySelector('.taskDescription').textContent = updatedTask.description;
-    taskElement.querySelector('.taskStatus').textContent = updatedTask.status;
-    taskElement.querySelector('.taskPriority').textContent = updatedTask.priority;
-    taskElement.querySelector('.taskAssigned').textContent = updatedTask.assignedTo;
-    taskElement.querySelector('.taskEndDate').textContent = updatedTask.endDate;
-  }
-  
-  
+
+function updateTaskInUI(task) {
+    const taskElement = document.getElementById(task.id);
+    if (taskElement) {
+        const titleElement = taskElement.querySelector('.taskTitle');
+        const descriptionElement = taskElement.querySelector('.taskDescription');
+        const statusElement = taskElement.querySelector('.taskStatus');
+        const priorityElement = taskElement.querySelector('.taskPriority');
+        const assignedElement = taskElement.querySelector('.taskAssigned');
+        const endDateElement = taskElement.querySelector('.taskEndDate');
+
+        if (titleElement) titleElement.textContent = task.title;
+        if (descriptionElement) descriptionElement.textContent = task.description;
+        if (statusElement) statusElement.textContent = task.status;
+        if (priorityElement) priorityElement.textContent = task.priority;
+        if (assignedElement) assignedElement.textContent = task.assignedTo;
+        if (endDateElement) endDateElement.textContent = task.endDate;
+    } else {
+        console.error("Elemento de tarea no encontrado: ", task.id);
+    }
+}
+
+
+

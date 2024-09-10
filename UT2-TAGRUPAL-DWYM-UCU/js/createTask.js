@@ -88,11 +88,20 @@ class CreateTask {
         `;
     }
     
-    openModal() {
-        document.querySelector('.modal-card-title').textContent = 'Creación de tarea';
-        document.querySelector('#saveButton button').textContent = 'Crear tarea';
-        document.querySelector('#modal-container .modal').classList.add('is-active');
+    openModal(task = null) {
+        if (task) {
+            // Si se pasa una tarea, se está editando
+            this.loadTask(task.id);
+        } else {
+            // Si no hay tarea, se está creando
+            document.querySelector('.modal-card-title').textContent = 'Creación de tarea';
+            document.querySelector('#saveButton button').textContent = 'Crear tarea';
+            document.querySelector('#saveButton button').removeAttribute('data-task-id'); // Elimina cualquier ID previo
+            this.cancelTask();
+            document.querySelector('#modal-container .modal').classList.add('is-active');
+        }
     }
+    
 
     validateTask() {
         const title = document.querySelector('#taskTitle').value.trim();
@@ -136,7 +145,6 @@ class CreateTask {
     
             const task = await response.json();
     
-            // Rellenar el modal con los datos de la tarea
             document.querySelector('#taskTitle').value = task.title;
             document.querySelector('#taskDesc').value = task.description;
             document.querySelector('#taskAssigned').value = task.assignedTo;
@@ -146,8 +154,6 @@ class CreateTask {
             document.querySelector('.modal-card-title').textContent = 'Editar tarea';
             document.querySelector('#saveButton button').textContent = 'Guardar cambios';
             document.querySelector('#saveButton button').disabled = false;
-    
-            // Guardar el ID de la tarea en un atributo de datos para usarlo al guardar los cambios
             document.querySelector('#saveButton button').setAttribute('data-task-id', task.id);
     
             document.querySelector('#modal-container .modal').classList.add('is-active');
@@ -167,12 +173,10 @@ class CreateTask {
         const priority = document.querySelector('#taskPriority').value;
         const status = document.querySelector('#taskStatus').value;
         let endDate = document.querySelector('#taskEndDate').value;
-    
-        // Generar la fecha de inicio
+
         const startDate = new Date().toISOString().slice(0, 10);
     
-        // Si el campo de fecha límite está vacío, asignar una fecha por defecto
-        if (!endDate) {
+         if (!endDate) {
             const today = new Date();
             today.setDate(today.getDate() + 7);
             endDate = today.toISOString().slice(0, 10);
@@ -185,7 +189,7 @@ class CreateTask {
             assignedTo: assigned,
             priority,
             status,
-            startDate,  // Incluye la fecha de inicio
+            startDate,  
             endDate
         };
     
