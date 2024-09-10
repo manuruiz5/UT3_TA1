@@ -21,7 +21,7 @@
     }
     toHTML() {
         return `
-            <div id="${this.id}"  class="card task" draggable="true" ondragstart="onDragStart(event)" onclick="taskModal.loadTask(this)">
+            <div id="${this.id}"  class="card task" draggable="true" ondragstart="onDragStart(event)" onclick="taskModal.loadTask('${this.id}')">
                <div class="card-content">
                    <div class="content">
                        <div class="mb-5 is-flex is-align-items-center">
@@ -90,16 +90,16 @@
      */
     textState(status) {
         switch (status) {
-            case 'backlog':
-                return 'La tarea está en el backlog';
-            case 'toDo':
-                return 'La tarea está en proceso';
-            case 'inProgress':
-                return 'La tarea está en progreso';
-            case 'blocked':
-                return 'La tarea está bloqueada';
-            case 'done':
-                return 'La tarea está completada';
+            case 'backlog'|| 'Backlog':
+                return 'La tarea está en el Backlog';
+            case 'toDo' || 'To Do':
+                return 'La tarea está en Proceso';
+            case 'inProgress'|| 'In Progress':
+                return 'La tarea está en Progreso';
+            case 'blocked' || 'Blocked':
+                return 'La tarea está Bloqueada';
+            case 'done'|| 'Done':
+                return 'La tarea está Completada';
             default:
                 return 'No se ha definido el estado de la tarea';
         }

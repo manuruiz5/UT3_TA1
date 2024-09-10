@@ -8,12 +8,10 @@ async function fetchTasks() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        
         if (data.length === 0) {
             console.log('No tasks found');
             return; // Salir si no hay tareas
         }
-        
         tasks = data;
         console.log(tasks);
         renderTasks(tasks);
@@ -30,9 +28,7 @@ function renderTasks(tasks) {
         blocked: document.getElementById('blocked')?.querySelector('.taskBody'),
         done: document.getElementById('done')?.querySelector('.taskBody'),
     };
-
     Object.values(columns).forEach(column => column.innerHTML = '');
-
     const statusToColumnKey = {
         "To Do": "toDo",
         "In Progress": "inProgress",
@@ -45,7 +41,6 @@ function renderTasks(tasks) {
         "done": "done",
         "backlog": "backlog"
     };
-
     tasks.forEach(task => {
         const normalizedStatus = statusToColumnKey[task.status];
         
@@ -57,8 +52,6 @@ function renderTasks(tasks) {
         }
     });
 }
-
-
 
 function createTaskElement(task) {
     const taskObj = new Task(
@@ -77,9 +70,7 @@ function createTaskElement(task) {
     return template.content.firstChild;
 }
 
-
 async function addTask(task) {
-
     try {
         const response = await fetch('http://localhost:3000/api/tasks', {
             method: 'POST',
@@ -88,11 +79,9 @@ async function addTask(task) {
             },
             body: JSON.stringify(task),
         });
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+        } 
         const newTask = await response.json();
         return newTask;
     } catch (error) {
@@ -143,11 +132,9 @@ async function deleteTask(taskId) {
         const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
             method: 'DELETE',
         });
-        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+        }      
         // Eliminar el elemento de la interfaz de usuario también podría ser una buena idea
         document.getElementById(taskId)?.remove();
     } catch (error) {
@@ -157,10 +144,6 @@ async function deleteTask(taskId) {
 
 async function updateTask(taskId, updatedTask) {
     try {
-        if (!taskId) {
-            console.error('taskId no está definido');
-            return;
-          }
         const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
             method: 'PUT',
             headers: {
@@ -168,22 +151,21 @@ async function updateTask(taskId, updatedTask) {
             },
             body: JSON.stringify(updatedTask),
         });
-
         if (response.ok) {
             const updatedTaskFromBackend = await response.json();
-            // Aquí puedes actualizar la interfaz del frontend con la respuesta obtenida
-            updateTaskInUI(updatedTaskFromBackend); // Esta función debe actualizar el DOM
-          } else {
+            updateTaskInUI(updatedTaskFromBackend); // Actualiza el DOM
+        } else {
             console.error('Error al actualizar la tarea');
-          }
-        } catch (error) {
-          console.error('Error de red al actualizar la tarea:', error);
         }
+    } catch (error) {
+        console.error('Error de red al actualizar la tarea:', error);
+    }
 }
+
+
 
 function updateTaskInUI(updatedTask) {
     const taskElement = document.getElementById(`task-${updatedTask.id}`);
-    
     // Actualiza los valores del DOM según los nuevos datos
     taskElement.querySelector('.taskTitle').textContent = updatedTask.title;
     taskElement.querySelector('.taskDescription').textContent = updatedTask.description;
@@ -192,4 +174,5 @@ function updateTaskInUI(updatedTask) {
     taskElement.querySelector('.taskAssigned').textContent = updatedTask.assignedTo;
     taskElement.querySelector('.taskEndDate').textContent = updatedTask.endDate;
   }
+  
   

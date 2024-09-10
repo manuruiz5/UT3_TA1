@@ -121,72 +121,86 @@ class CreateTask {
         document.querySelector('#saveButton button').disabled = !isValid;
         return isValid;
     }
-    loadTask(task) {
-        const currentTask = JSON.parse(localStorage.getItem('tasks')).find(t => t.id === task.id);
-        this.editing = true;
-        this.task = task;
-        document.querySelector('#taskTitle').value = currentTask.title;
-        document.querySelector('#taskDesc').value = currentTask.description;
-        document.querySelector('#taskAssigned').value = currentTask.assignedTo;
-        document.querySelector('#taskPriority').value = currentTask.priority;
-        document.querySelector('#taskStatus').value = currentTask.status;
-        document.querySelector('#taskEndDate').value = currentTask.endDate;
-        document.querySelector('.modal-card-title').textContent = 'Editar tarea';
-        document.querySelector('#saveButton button').textContent = 'Guardar cambios';
-        document.querySelector('#saveButton button').disabled = false;
-        document.querySelector('#modal-container .modal').classList.add('is-active');
+
+    async loadTask(taskId) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+            if (!response.ok) {
+                throw new Error('Error al cargar la tarea');
+            }
+    
+            const task = await response.json();
+    
+            // Rellenar el modal con los datos de la tarea
+            document.querySelector('#taskTitle').value = task.title;
+            document.querySelector('#taskDesc').value = task.description;
+            document.querySelector('#taskAssigned').value = task.assignedTo;
+            document.querySelector('#taskPriority').value = task.priority;
+            document.querySelector('#taskStatus').value = task.status;
+            document.querySelector('#taskEndDate').value = task.endDate;
+            document.querySelector('.modal-card-title').textContent = 'Editar tarea';
+            document.querySelector('#saveButton button').textContent = 'Guardar cambios';
+            document.querySelector('#saveButton button').disabled = false;
+    
+            // Guardar el ID de la tarea en un atributo de datos para usarlo al guardar los cambios
+            document.querySelector('#saveButton button').setAttribute('data-task-id', task.id);
+    
+            document.querySelector('#modal-container .modal').classList.add('is-active');
+        } catch (error) {
+            console.error('Error al cargar la tarea:', error);
+        }
     }
+    
+    
 
     async saveTask() {
         if (!this.validateTask()) return;
-
-
+    
         const title = document.querySelector('#taskTitle').value;
         const description = document.querySelector('#taskDesc').value;
         const assigned = document.querySelector('#taskAssigned').value;
         const priority = document.querySelector('#taskPriority').value;
         const status = document.querySelector('#taskStatus').value;
         let endDate = document.querySelector('#taskEndDate').value;
-        const uniqueId = `task-${Math.random().toString(36).substr(2, 9)}`
+    
+        // Generar la fecha de inicio
+        const startDate = new Date().toISOString().slice(0, 10);
+    
+        // Si el campo de fecha límite está vacío, asignar una fecha por defecto
         if (!endDate) {
             const today = new Date();
             today.setDate(today.getDate() + 7);
             endDate = today.toISOString().slice(0, 10);
         }
-        const task = new Task(title, description, assigned, priority, status, new Date().toISOString().slice(0, 10), endDate, uniqueId);
-        let backLog = document.getElementById('backlog');
-        let toDo = document.getElementById('toDo');
-        let inProgress = document.getElementById('inProgress');
-        let blocked = document.getElementById('blocked');
-        let done = document.getElementById('done');
-        switch (task.status) {
-            case 'backlog':
-                backLog.innerHTML += task.toHTML();
-                break;
-            case 'toDo':
-                toDo.innerHTML += task.toHTML();
-                break;
-            case 'inProgress':
-                inProgress.innerHTML += task.toHTML();
-                break;
-            case 'blocked':
-                blocked.innerHTML += task.toHTML();
-                break;
-            case 'done':
-                done.innerHTML += task.toHTML();
-                break;
-            default:
-                break;
+    
+        const taskId = document.querySelector('#saveButton button').getAttribute('data-task-id');
+        const task = {
+            title,
+            description,
+            assignedTo: assigned,
+            priority,
+            status,
+            startDate,  // Incluye la fecha de inicio
+            endDate
+        };
+    
+        if (taskId) {
+            // Si hay un ID de tarea, actualiza la tarea existente
+            await updateTask(taskId, task);
+        } else {
+            // Si no hay ID, crea una nueva tarea
+            await addTask(task);
         }
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        tasks.push(task);
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-
-        addTask(task);
-
+    
         // Limpia los campos después de guardar la tarea
         this.cancelTask();
     }
+    
     cancelTask() {
         document.querySelector('#taskTitle').value = '';
         document.querySelector('#taskDesc').value = '';
